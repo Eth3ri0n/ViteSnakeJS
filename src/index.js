@@ -6,7 +6,8 @@ const CTX = CANVAS.getContext('2d'); // Get canvas context
 CANVAS.width = innerWidth; // Set canvas width to window width
 CANVAS.height = innerHeight; // Set canvas height to window height
 
-const DIRECTION = 'RIGHT';
+let direction = 'RIGHT'; // Snake direction
+const SPEED = 700; // Snake speed
 const GRID_SIZE = 40; // Size of each grid cell
 // Snake initial position
 const SNAKE = [
@@ -39,10 +40,53 @@ const DRAW_APPLE = () => {
   CTX.fillRect(APPLE.x * GRID_SIZE, APPLE.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
 };
 
+// Keyboard event listener
+window.addEventListener('keydown', (event) => {
+  switch (event.key) {
+    case 'ArrowUp': {
+      direction = 'UP';
+      break;
+    }
+    case 'ArrowDown': {
+      direction = 'DOWN';
+      break;
+    }
+    case 'ArrowLeft': {
+      direction = 'LEFT';
+      break;
+    }
+    case 'ArrowRight': {
+      direction = 'RIGHT';
+      break;
+    }
+  }
+  console.log(event);
+});
+
+// Check if snake has collided with wall or itself
+const GAMEOVER = () => {
+  if (
+    SNAKE[0].x < 0 ||
+    SNAKE[0].x >= CANVAS.width / GRID_SIZE ||
+    SNAKE[0].y < 0 ||
+    SNAKE[0].y >= CANVAS.height / GRID_SIZE
+  ) {
+    return true;
+  } else {
+    const [head, ...body] = SNAKE;
+    for (let bodyPart of body) {
+      if (head.x === bodyPart.x && head.y === bodyPart.y) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
 const UPDATE_SNAKE_POSITION = () => {
   // Move snake head
   let head;
-  switch (DIRECTION) {
+  switch (direction) {
     case 'RIGHT': {
       head = [SNAKE[0].x + 1, SNAKE[0].y];
       break;
@@ -63,14 +107,20 @@ const UPDATE_SNAKE_POSITION = () => {
 
   SNAKE.unshift({ x: head[0], y: head[1] }); // Add new head
   SNAKE.pop(); // Remove tail
+
+  return GAMEOVER();
 };
 
 const MOVE_SNAKE = () => {
-  DRAW_MAP();
-  DRAW_SNAKE();
-  DRAW_APPLE();
-  UPDATE_SNAKE_POSITION();
-  setTimeout(() => requestAnimationFrame(MOVE_SNAKE), 1000); // Move snake every 1 second
+  if (!UPDATE_SNAKE_POSITION()) {
+    DRAW_MAP();
+    DRAW_SNAKE();
+    DRAW_APPLE();
+    setTimeout(() => requestAnimationFrame(MOVE_SNAKE), 1000 - SPEED); // Move snake every 1 second - speed
+  } else {
+    alert('Game Over'); // Show game over message
+    window.location.reload(); // Reload game
+  }
 };
 
 requestAnimationFrame(MOVE_SNAKE); // Start game loop
