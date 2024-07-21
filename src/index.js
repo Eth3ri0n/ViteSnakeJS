@@ -7,7 +7,7 @@ CANVAS.width = innerWidth; // Set canvas width to window width
 CANVAS.height = innerHeight; // Set canvas height to window height
 
 let direction = 'RIGHT'; // Snake direction
-const SPEED = 700; // Snake speed
+let speed = 0; // Snake speed
 const GRID_SIZE = 40; // Size of each grid cell
 // Snake initial position
 const SNAKE = [
@@ -17,6 +17,7 @@ const SNAKE = [
 ];
 
 let apple = { x: 5, y: 5 }; // Apple initial position
+let score = 0; // Game score
 
 const DRAW_MAP = () => {
   CTX.fillStyle = '#000';
@@ -84,9 +85,11 @@ const GAMEOVER = () => {
 };
 
 const GENERATE_APPLE = () => {
-  apple.x = Math.floor(Math.random() * (CANVAS.width / GRID_SIZE - 10)); // Generate random x position
-  apple.y = Math.floor(Math.random() * (CANVAS.height / GRID_SIZE - 10)); // Generate random y position
-  
+  score++; // Increase score
+
+  apple.x = Math.floor(Math.random() * (CANVAS.width / GRID_SIZE)); // Generate random x position
+  apple.y = Math.floor(Math.random() * (CANVAS.height / GRID_SIZE)); // Generate random y position
+
   // Check if apple is on snake
   for (let snakePart of SNAKE) {
     if (apple.x === snakePart.x && apple.y === snakePart.y) {
@@ -126,14 +129,23 @@ const UPDATE_SNAKE_POSITION = () => {
   return GAMEOVER();
 };
 
+const DRAW_SCORE = () => {
+  CTX.fillStyle = 'white';
+  CTX.font = '40px sans-serif';
+  CTX.textBaseline = 'top';
+  CTX.fillText(`Score: ${score}`, GRID_SIZE, GRID_SIZE);
+};
+
 const MOVE_SNAKE = () => {
   if (!UPDATE_SNAKE_POSITION()) {
+    speed = score * 50; // Increase speed
     DRAW_MAP();
     DRAW_SNAKE();
     DRAW_APPLE();
-    setTimeout(() => requestAnimationFrame(MOVE_SNAKE), 1000 - SPEED); // Move snake every 1 second - speed
+    DRAW_SCORE();
+    setTimeout(() => requestAnimationFrame(MOVE_SNAKE), 1000 - speed); // Move snake every 1 second - speed
   } else {
-    alert('Game Over'); // Show game over message
+    alert(`Game Over ! Max points : ${score}`); // Show game over message
     window.location.reload(); // Reload game
   }
 };
