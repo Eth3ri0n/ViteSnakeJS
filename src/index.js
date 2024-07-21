@@ -16,7 +16,7 @@ const SNAKE = [
   { x: 7, y: 9 },
 ];
 
-const APPLE = { x: 5, y: 5 }; // Apple initial position
+let apple = { x: 5, y: 5 }; // Apple initial position
 
 const DRAW_MAP = () => {
   CTX.fillStyle = '#000';
@@ -37,7 +37,7 @@ const DRAW_SNAKE = () => {
 
 const DRAW_APPLE = () => {
   CTX.fillStyle = 'red';
-  CTX.fillRect(APPLE.x * GRID_SIZE, APPLE.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
+  CTX.fillRect(apple.x * GRID_SIZE, apple.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
 };
 
 // Keyboard event listener
@@ -83,6 +83,18 @@ const GAMEOVER = () => {
   return false;
 };
 
+const GENERATE_APPLE = () => {
+  apple.x = Math.floor(Math.random() * (CANVAS.width / GRID_SIZE - 10)); // Generate random x position
+  apple.y = Math.floor(Math.random() * (CANVAS.height / GRID_SIZE - 10)); // Generate random y position
+  
+  // Check if apple is on snake
+  for (let snakePart of SNAKE) {
+    if (apple.x === snakePart.x && apple.y === snakePart.y) {
+      return GENERATE_APPLE();
+    }
+  }
+};
+
 const UPDATE_SNAKE_POSITION = () => {
   // Move snake head
   let head;
@@ -106,8 +118,11 @@ const UPDATE_SNAKE_POSITION = () => {
   }
 
   SNAKE.unshift({ x: head[0], y: head[1] }); // Add new head
-  SNAKE.pop(); // Remove tail
-
+  if (head[0] === apple.x && head[1] === apple.y) {
+    GENERATE_APPLE(); // Generate new apple
+  } else {
+    SNAKE.pop(); // Remove tail
+  }
   return GAMEOVER();
 };
 
